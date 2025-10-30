@@ -61,7 +61,7 @@ export const useNotaOperations = (
     setSelectedNota: (nota: NotaExplicativa | null) => void
   ): Promise<void> => {
     try {
-      const res = await api.delete(`/notas/${companyId}/${nota.id}`);
+      const res = await api.delete(`/notas/${companyId}/${nota.number}`);
 
       if (res.status >= 200 && res.status < 300) {
         await refreshNotas();

@@ -88,7 +88,7 @@ const exportToWord = async (): Promise<void> => {
       link.href = url;
       
       // pegar nome da empresa para nome do arquivo
-      const company = await api.get(`/companies/${companyId}`);
+      const company = await api.get(`/companies/${companyId}/unique`);
       const companyName = company.data.name
       const filename = `Notas Explicativas - ${companyName}.docx`;
       
