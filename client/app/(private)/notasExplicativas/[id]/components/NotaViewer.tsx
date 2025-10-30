@@ -5,8 +5,9 @@ import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { useState, useRef } from "react";
-import { NotaExplicativa, Comentario } from "../types";
-import api from "@/app/api/api";
+import { NotaExplicativa } from "../types";
+import { useComments } from "../hooks/useComments";
+import { ComentarioItem } from "./ComentarioItem";
 
 interface NotaViewerProps {
   selectedNota: NotaExplicativa | null;
@@ -17,9 +18,15 @@ interface NotaViewerProps {
 export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewerProps) {
   const [showComentariosModal, setShowComentariosModal] = useState(false);
   const [novoComentario, setNovoComentario] = useState("");
-  const [comentarios, setComentarios] = useState<Comentario[]>([]);
-  const [loading, setLoading] = useState(false);
   const toast = useRef<Toast>(null);
+  
+  const {
+    comentarios,
+    loading,
+    carregarComentarios,
+    adicionarComentario,
+    excluirComentario
+  } = useComments(toast);
 
   const handleDeleteClick = (nota: NotaExplicativa) => {
     confirmDialog({
@@ -36,68 +43,21 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
     if (!selectedNota) return;
     
     setShowComentariosModal(true);
-    await carregarComentarios();
-  };
-
-  const carregarComentarios = async () => {
-    if (!selectedNota) return;
-    
-    try {
-      setLoading(true);
-      const response = await api.get(`/comments/${selectedNota.id}`);
-      
-      if (response.status >= 200 && response.status < 300) {
-        setComentarios(response.data);
-      } else {
-        throw new Error('Erro ao carregar comentários');
-      }
-      
-    } catch (error) {
-      console.error("Erro ao carregar comentários:", error);
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Não foi possível carregar os comentários',
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+    await carregarComentarios(selectedNota.id);
   };
 
   const handleAdicionarComentario = async () => {
     if (!selectedNota || !novoComentario.trim()) return;
 
-    try {
-      setLoading(true);
-      const response = await api.post('/comments', {
-          notaId: selectedNota.id,
-          content: novoComentario.trim()
-      });
-
-      if (response.status >= 200 && response.status < 300) {
-        setNovoComentario("");
-        await carregarComentarios();
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: 'Comentário adicionado com sucesso',
-          life: 3000
-        });
-      } else {
-        throw new Error("Erro ao adicionar comentário");
-      }
-    } catch (error) {
-      console.error("Erro ao adicionar comentário:", error);
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Erro',
-        detail: 'Não foi possível adicionar o comentário',
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
+    const success = await adicionarComentario(selectedNota.id, novoComentario);
+    if (success) {
+      setNovoComentario("");
     }
+  };
+
+  const handleExcluirComentario = async (comentarioId: string) => {
+    if (!selectedNota) return;
+    await excluirComentario(comentarioId, selectedNota.id);
   };
 
   const formatCurrency = (value: number | null) => {
@@ -106,16 +66,6 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   if (!selectedNota) {
@@ -141,6 +91,7 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
         icon="pi pi-times" 
         onClick={() => setShowComentariosModal(false)} 
         className="p-button-text" 
+        disabled={loading}
       />
       <Button 
         label="Adicionar Comentário" 
@@ -235,28 +186,32 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
         visible={showComentariosModal}
         style={{ width: '50vw' }}
         footer={footerComentariosModal}
-        onHide={() => setShowComentariosModal(false)}
+        onHide={() => {
+          setShowComentariosModal(false);
+          setNovoComentario(""); // Limpa o campo ao fechar
+        }}
       >
         <div className="flex flex-column gap-3">
           {/* Lista de Comentários */}
           <div className="flex flex-column gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-            {comentarios.length === 0 ? (
+            {loading && comentarios.length === 0 ? (
+              <div className="text-center p-4">
+                <i className="pi pi-spin pi-spinner text-2xl"></i>
+                <p className="mt-2">Carregando comentários...</p>
+              </div>
+            ) : comentarios.length === 0 ? (
               <div className="text-center p-4 text-color-secondary">
                 <i className="pi pi-comment text-2xl mb-2"></i>
                 <p>Nenhum comentário ainda.</p>
                 <p className="text-sm">Seja o primeiro a comentar!</p>
               </div>
             ) : (
-              comentarios.map((comentario) => (
-                <div key={comentario.id} className="p-3 border-round surface-border bg-gray-50">
-                  <div className="flex justify-content-between align-items-start mb-2">
-                    <span className="font-semibold text-sm">{comentario.user.name}</span>
-                    <span className="text-xs text-color-secondary">
-                      {formatDate(comentario.createdAt)}
-                    </span>
-                  </div>
-                  <p className="text-sm m-0">{comentario.content}</p>
-                </div>
+              comentarios.map((comentario: any) => (
+                <ComentarioItem
+                  key={comentario.id}
+                  comentario={comentario}
+                  onExcluir={handleExcluirComentario}
+                />
               ))
             )}
           </div>
@@ -273,7 +228,11 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
               rows={3}
               placeholder="Digite seu comentário..."
               className="w-full"
+              disabled={loading}
             />
+            <small className="text-color-secondary">
+              {novoComentario.length}/500 caracteres
+            </small>
           </div>
         </div>
       </Dialog>
