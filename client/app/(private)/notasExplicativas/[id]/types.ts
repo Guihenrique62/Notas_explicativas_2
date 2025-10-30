@@ -7,6 +7,20 @@ export interface NotaExplicativa {
   updatedAt: string;
   tabelas: TabelaDemonstrativa[];
 }
+// Adicione ao seu arquivo types.ts
+export interface Comentario {
+  id: string;
+  notaId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
 
 export interface NotasExplicativasPageProps {
   params: {
