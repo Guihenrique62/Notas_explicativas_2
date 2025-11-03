@@ -17,6 +17,7 @@ model User {
   createdAt DateTime @default(now())
 
   groups GroupCompanies[] @relation("UserGroup")
+  NotaComments NotaComments[]
 }
 
 /// Funções de usuário
@@ -166,6 +167,7 @@ model NotasExplicativas {
   updatedAt   DateTime @updatedAt
 
   tabelas     TabelaDemonstrativa[]
+  NotaComments NotaComments[]
 
   // Garante que cada empresa tenha apenas uma nota por número
   @@unique([companyId, number])
@@ -173,6 +175,7 @@ model NotasExplicativas {
   // Index para otimizar consultas
   @@index([companyId])
   @@index([number])
+  
 }
 
 
@@ -192,4 +195,21 @@ model TabelaDemonstrativa {
 
   @@index([notaId])
   @@index([ordem])
+}
+
+model NotaComments {
+  id          String   @id @default(uuid())
+  notaId      String
+  nota        NotasExplicativas @relation(fields: [notaId], references: [id], onDelete: Cascade)
+
+  userId     String
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content    String   // Conteúdo do comentário
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([notaId])
+  @@index([userId])
+  @@index([createdAt])
 }

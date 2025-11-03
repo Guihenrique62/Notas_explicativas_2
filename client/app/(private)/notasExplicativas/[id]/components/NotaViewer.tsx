@@ -1,6 +1,13 @@
+// components/NotaViewer.tsx
 import { Button } from "primereact/button";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { Dialog } from "primereact/dialog";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Toast } from "primereact/toast";
+import { useState, useRef, useEffect } from "react";
 import { NotaExplicativa } from "../types";
+import { useComments } from "../hooks/useComments";
+import { ComentarioItem } from "./ComentarioItem";
 
 interface NotaViewerProps {
   selectedNota: NotaExplicativa | null;
@@ -9,7 +16,41 @@ interface NotaViewerProps {
 }
 
 export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewerProps) {
+  const [showComentariosModal, setShowComentariosModal] = useState(false);
+  const [novoComentario, setNovoComentario] = useState("");
+  const toast = useRef<Toast>(null);
   
+  const {
+    comentarios,
+    loading,
+    carregarComentarios,
+    adicionarComentario,
+    excluirComentario
+  } = useComments(toast);
+
+  // Atualiza o total quando comentários são adicionados/removidos no modal
+  const handleAdicionarComentario = async () => {
+    if (!selectedNota || !novoComentario.trim()) return;
+
+    const success = await adicionarComentario(selectedNota.id, novoComentario);
+    if (success) {
+      setNovoComentario("");
+      // Atualiza o total localmente - AGORA USA totalComentarios DA NOTA
+      if (selectedNota.totalComentarios !== undefined) {
+        selectedNota.totalComentarios += 1;
+      }
+    }
+  };
+
+  const handleExcluirComentario = async (comentarioId: string) => {
+    if (!selectedNota) return;
+    await excluirComentario(comentarioId, selectedNota.id);
+    // Atualiza o total localmente - AGORA USA totalComentarios DA NOTA
+    if (selectedNota.totalComentarios !== undefined && selectedNota.totalComentarios > 0) {
+      selectedNota.totalComentarios -= 1;
+    }
+  };
+
   const handleDeleteClick = (nota: NotaExplicativa) => {
     confirmDialog({
       message: `Tem certeza que deseja deletar a nota "${nota.title}"? Esta ação não pode ser desfeita.`,
@@ -19,6 +60,13 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
       accept: () => onDelete(nota),
       rejectClassName: 'p-button-secondary p-button-text',
     });
+  };
+
+  const handleOpenComentarios = async () => {
+    if (!selectedNota) return;
+    
+    setShowComentariosModal(true);
+    await carregarComentarios(selectedNota.id);
   };
 
   const formatCurrency = (value: number | null) => {
@@ -45,9 +93,29 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
     );
   }
 
+  const footerComentariosModal = (
+    <div>
+      <Button 
+        label="Cancelar" 
+        icon="pi pi-times" 
+        onClick={() => setShowComentariosModal(false)} 
+        className="p-button-text" 
+        disabled={loading}
+      />
+      <Button 
+        label="Adicionar Comentário" 
+        icon="pi pi-check" 
+        onClick={handleAdicionarComentario} 
+        disabled={!novoComentario.trim() || loading}
+        loading={loading}
+      />
+    </div>
+  );
+
   return (
     <div className="col-12 lg:col-6 xl:col-7 mt-3 lg:mt-0">
       <div className="card h-full">
+        <Toast ref={toast} />
         <ConfirmDialog />
         
         <div className="flex flex-column h-full">
@@ -61,6 +129,32 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
             </div>
             
             <div className="flex gap-2 flex-shrink-0">
+              {/* Botão de Comentários com Indicador - USA totalComentarios DA NOTA */}
+              <div className="relative" style={{ position: 'relative', display: 'inline-block' }}>
+                <Button
+                  icon="pi pi-comments"
+                  tooltip="Comentários"
+                  tooltipOptions={{ position: 'top' }}
+                  className="p-button-outlined p-button-info p-button-sm"
+                  onClick={handleOpenComentarios}
+                />
+                {/* Indicador de comentários - USA totalComentarios DA NOTA */}
+                {selectedNota.totalComentarios > 0 && (
+                  <span 
+                    className="absolute bg-red-500 text-white text-xs rounded-full w-5 h-5 flex align-items-center justify-content-center shadow-md"
+                    style={{ 
+                      top: '-8px', 
+                      right: '-8px',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      zIndex: 10
+                    }}
+                  >
+                    {selectedNota.totalComentarios}
+                  </span>
+                )}
+              </div>
+              
               <Button
                 icon="pi pi-pencil"
                 label="Editar"
@@ -113,6 +207,63 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
           )}
         </div>
       </div>
+
+      {/* Modal de Comentários */}
+      <Dialog 
+        header={`Comentários - ${selectedNota.title}`}
+        visible={showComentariosModal}
+        style={{ width: '50vw' }}
+        footer={footerComentariosModal}
+        onHide={() => {
+          setShowComentariosModal(false);
+          setNovoComentario("");
+        }}
+      >
+        <div className="flex flex-column gap-3">
+          {/* Lista de Comentários */}
+          <div className="flex flex-column gap-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            {loading && comentarios.length === 0 ? (
+              <div className="text-center p-4">
+                <i className="pi pi-spin pi-spinner text-2xl"></i>
+                <p className="mt-2">Carregando comentários...</p>
+              </div>
+            ) : comentarios.length === 0 ? (
+              <div className="text-center p-4 text-color-secondary">
+                <i className="pi pi-comment text-2xl mb-2"></i>
+                <p>Nenhum comentário ainda.</p>
+                <p className="text-sm">Seja o primeiro a comentar!</p>
+              </div>
+            ) : (
+              comentarios.map((comentario: any) => (
+                <ComentarioItem
+                  key={comentario.id}
+                  comentario={comentario}
+                  onExcluir={handleExcluirComentario}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Área para novo comentário */}
+          <div className="border-top-1 surface-border pt-3">
+            <label htmlFor="novoComentario" className="font-semibold block mb-2">
+              Adicionar Comentário
+            </label>
+            <InputTextarea
+              id="novoComentario"
+              value={novoComentario}
+              onChange={(e) => setNovoComentario(e.target.value)}
+              rows={3}
+              placeholder="Digite seu comentário..."
+              className="w-full"
+              disabled={loading}
+            />
+            <small className="text-color-secondary">
+              {novoComentario.length}/500 caracteres
+            </small>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

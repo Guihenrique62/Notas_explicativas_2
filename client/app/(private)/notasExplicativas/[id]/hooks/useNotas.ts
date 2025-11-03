@@ -17,6 +17,16 @@ export const useNotas = (companyId: string): UseNotasReturn => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const carregarComentariosDaNota = async (notaId: string): Promise<number> => {
+    try {
+      const response = await api.get(`/comments/${notaId}`);
+      return response.data.length;
+    } catch (error) {
+      console.error(`Erro ao carregar comentários da nota ${notaId}:`, error);
+      return 0;
+    }
+  };
+
   const fetchNotas = async (): Promise<void> => {
     try {
       setLoading(true);
@@ -25,11 +35,20 @@ export const useNotas = (companyId: string): UseNotasReturn => {
       const response = await api.get(`/notas/${companyId}`);
       
       if (response.status >= 200 && response.status < 300) {
-        const notasComTabelas = response.data.map((nota: any) => ({
-          ...nota,
-          tabelas: nota.tabelas || []
-        }));
-        setNotas(notasComTabelas);
+        // Carrega comentários para cada nota em paralelo
+        const notasComDadosCompletos = await Promise.all(
+          response.data.map(async (nota: any) => {
+            const totalComentarios = await carregarComentariosDaNota(nota.id);
+            
+            return {
+              ...nota,
+              tabelas: nota.tabelas || [],
+              totalComentarios
+            };
+          })
+        );
+        
+        setNotas(notasComDadosCompletos);
       } else {
         throw new Error('Erro ao buscar notas');
       }
@@ -43,40 +62,40 @@ export const useNotas = (companyId: string): UseNotasReturn => {
   };
 
   const handleReorder = async (reorderedNotas: NotaExplicativa[]): Promise<void> => {
-  try {
-    // Valida se a reordenação é válida
-    if (reorderedNotas.length === 0) return;
+    try {
+      // Valida se a reordenação é válida
+      if (reorderedNotas.length === 0) return;
 
-    // Prepara os dados para enviar ao backend
-    const novasOrdens = reorderedNotas.map((nota, index) => ({
-      id: nota.id,
-      number: index + 1 // Garante números sequenciais começando de 1
-    }));
+      // Prepara os dados para enviar ao backend
+      const novasOrdens = reorderedNotas.map((nota, index) => ({
+        id: nota.id,
+        number: index + 1 // Garante números sequenciais começando de 1
+      }));
 
-    // Envia para o backend
-    await api.patch(`/notas/${companyId}/reorder`, {
-      novasOrdens
-    });
+      // Envia para o backend
+      await api.patch(`/notas/${companyId}/reorder`, {
+        novasOrdens
+      });
 
-    // Atualiza os números localmente para refletir a nova ordem
-    const notasComNumerosAtualizados = reorderedNotas.map((nota, index) => ({
-      ...nota,
-      number: index + 1
-    }));
-    
-    setNotas(notasComNumerosAtualizados);
+      // Atualiza os números localmente para refletir a nova ordem
+      const notasComNumerosAtualizados = reorderedNotas.map((nota, index) => ({
+        ...nota,
+        number: index + 1
+      }));
+      
+      setNotas(notasComNumerosAtualizados);
 
-  } catch (err: any) {
-    console.error('Erro ao reordenar notas:', err);
-    // Em caso de erro, recarrega as notas do servidor
-    await fetchNotas();
-    
-    const errorMessage = err.response?.data?.error || 'Erro ao reordenar notas';
-    throw new Error(errorMessage);
-  }
-};
+    } catch (err: any) {
+      console.error('Erro ao reordenar notas:', err);
+      // Em caso de erro, recarrega as notas do servidor
+      await fetchNotas();
+      
+      const errorMessage = err.response?.data?.error || 'Erro ao reordenar notas';
+      throw new Error(errorMessage);
+    }
+  };
 
-const exportToWord = async (): Promise<void> => {
+  const exportToWord = async (): Promise<void> => {
     try {
       const response = await api.get(`/export/${companyId}/word`, {
         responseType: 'blob' // Importante para receber arquivos
@@ -88,8 +107,8 @@ const exportToWord = async (): Promise<void> => {
       link.href = url;
       
       // pegar nome da empresa para nome do arquivo
-      const company = await api.get(`/companies/${companyId}`);
-      const companyName = company.data.name
+      const company = await api.get(`/companies/${companyId}/unique`);
+      const companyName = company.data.name;
       const filename = `Notas Explicativas - ${companyName}.docx`;
       
       link.setAttribute('download', filename);

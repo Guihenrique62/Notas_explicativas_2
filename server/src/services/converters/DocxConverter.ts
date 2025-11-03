@@ -30,7 +30,7 @@ export class DocxConverter {
   private createDocument(notas: any[]): Document {
     const children = [];
 
-    // Título do documento
+    // Título do documento - ABNT: Centralizado, negrito, tamanho maior
     children.push(
       new Paragraph({
         children: [
@@ -38,6 +38,8 @@ export class DocxConverter {
             text: "NOTAS EXPLICATIVAS",
             bold: true,
             size: 32,
+            color: "000000", // Preto
+            font: "Times New Roman"
           })
         ],
         heading: HeadingLevel.TITLE,
@@ -71,7 +73,7 @@ export class DocxConverter {
   private createNotaSection(nota: any, index: number, totalNotas: number): any[] {
     const section = [];
 
-    // Título da nota
+    // Título da nota - ABNT: Preto, negrito, Times New Roman
     section.push(
       new Paragraph({
         children: [
@@ -79,7 +81,8 @@ export class DocxConverter {
             text: `${nota.number} - ${nota.title}`,
             bold: true,
             size: 26,
-            color: "2c5aa0"
+            color: "000000", // Preto conforme solicitado
+            font: "Times New Roman"
           })
         ],
         heading: HeadingLevel.HEADING_2,
@@ -98,7 +101,8 @@ export class DocxConverter {
             new TextRun({
               text: "Nenhum conteúdo adicionado a esta nota.",
               italics: true,
-              color: "95a5a6"
+              color: "666666", // Cinza escuro
+              font: "Times New Roman"
             })
           ],
           alignment: AlignmentType.CENTER,
@@ -123,7 +127,8 @@ export class DocxConverter {
           children: [
             new TextRun({
               text: "―".repeat(50),
-              color: "bdc3c7"
+              color: "cccccc", // Cinza claro
+              font: "Times New Roman"
             })
           ],
           alignment: AlignmentType.CENTER,
@@ -137,6 +142,15 @@ export class DocxConverter {
 
   private createTabelaSection(tabelas: any[]): any[] {
     const section = [];
+    
+    // Espaço antes da tabela
+    section.push(
+      new Paragraph({
+        children: [new TextRun({ text: "" })],
+        spacing: { before: 200, after: 200 }
+      })
+    );
+
     // Criar tabela
     const table = this.createTable(tabelas);
     section.push(table);
@@ -145,18 +159,23 @@ export class DocxConverter {
   }
 
   private createTable(tabelas: any[]): Table {
-    // Cabeçalho da tabela
+    // Cabeçalho da tabela - ABNT: Fundo cinza, texto preto
     const headerRow = new TableRow({
       children: [
         new TableCell({
           children: [new Paragraph({
-            children: [new TextRun({ text: "Conta", bold: true })],
+            children: [new TextRun({ 
+              text: "Conta", 
+              bold: true,
+              color: "000000", // Preto
+              font: "Times New Roman"
+            })],
             alignment: AlignmentType.CENTER
           })],
           shading: {
             type: ShadingType.CLEAR,
-            color: "83afef",
-            fill: "83afef"
+            color: "d9d9d9", // Cinza claro
+            fill: "d9d9d9"
           },
           margins: {
             top: 100,
@@ -167,13 +186,18 @@ export class DocxConverter {
         }),
         new TableCell({
           children: [new Paragraph({
-            children: [new TextRun({ text: "Ano Anterior", bold: true })],
+            children: [new TextRun({ 
+              text: "Ano Anterior", 
+              bold: true,
+              color: "000000", // Preto
+              font: "Times New Roman"
+            })],
             alignment: AlignmentType.CENTER
           })],
           shading: {
             type: ShadingType.CLEAR,
-            color: "83afef",
-            fill: "83afef"
+            color: "d9d9d9",
+            fill: "d9d9d9"
           },
           margins: {
             top: 100,
@@ -184,13 +208,18 @@ export class DocxConverter {
         }),
         new TableCell({
           children: [new Paragraph({
-            children: [new TextRun({ text: "Ano Atual", bold: true })],
+            children: [new TextRun({ 
+              text: "Ano Atual", 
+              bold: true,
+              color: "000000", // Preto
+              font: "Times New Roman"
+            })],
             alignment: AlignmentType.CENTER
           })],
           shading: {
             type: ShadingType.CLEAR,
-            color: "83afef",
-            fill: "83afef"
+            color: "d9d9d9",
+            fill: "d9d9d9"
           },
           margins: {
             top: 100,
@@ -213,13 +242,15 @@ export class DocxConverter {
             children: [new Paragraph({
               children: [new TextRun({ 
                 text: tabela.conta || '',
-                bold: true 
+                bold: true,
+                color: "000000", // Preto
+                font: "Times New Roman"
               })]
             })],
             shading: isEven ? {
               type: ShadingType.CLEAR,
-              color: "f8fafc",
-              fill: "f8fafc"
+              color: "f2f2f2", // Cinzo muito claro para zebrado
+              fill: "f2f2f2"
             } : undefined,
             margins: {
               top: 100,
@@ -232,15 +263,15 @@ export class DocxConverter {
             children: [new Paragraph({
               children: [new TextRun({ 
                 text: tabela.anoAnterior ? this.formatCurrency(tabela.anoAnterior) : '-',
-                font: "Courier New",
-                color: tabela.anoAnterior && tabela.anoAnterior < 0 ? "e74c3c" : "27ae60"
+                font: "Times New Roman", // Fonte padrão ABNT
+                color: "000000" // Preto para valores normais
               })],
               alignment: AlignmentType.RIGHT
             })],
             shading: isEven ? {
               type: ShadingType.CLEAR,
-              color: "f8fafc",
-              fill: "f8fafc"
+              color: "f2f2f2",
+              fill: "f2f2f2"
             } : undefined,
             margins: {
               top: 100,
@@ -253,15 +284,15 @@ export class DocxConverter {
             children: [new Paragraph({
               children: [new TextRun({ 
                 text: tabela.anoAtual ? this.formatCurrency(tabela.anoAtual) : '-',
-                font: "Courier New",
-                color: tabela.anoAtual && tabela.anoAtual < 0 ? "e74c3c" : "27ae60"
+                font: "Times New Roman", // Fonte padrão ABNT
+                color: "000000" // Preto para valores normais
               })],
               alignment: AlignmentType.RIGHT
             })],
             shading: isEven ? {
               type: ShadingType.CLEAR,
-              color: "f8fafc",
-              fill: "f8fafc"
+              color: "f2f2f2",
+              fill: "f2f2f2"
             } : undefined,
             margins: {
               top: 100,
@@ -281,12 +312,12 @@ export class DocxConverter {
       },
       columnWidths: [5000, 2500, 2500],
       borders: {
-        top: { style: BorderStyle.SINGLE, size: 2, color: "2c5aa0" },
-        bottom: { style: BorderStyle.SINGLE, size: 2, color: "2c5aa0" },
-        left: { style: BorderStyle.SINGLE, size: 1, color: "e0e0e0" },
-        right: { style: BorderStyle.SINGLE, size: 1, color: "e0e0e0" },
-        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "e0e0e0" },
-        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "e0e0e0" },
+        top: { style: BorderStyle.SINGLE, size: 1, color: "000000" }, // Preto
+        bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+        left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+        right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
       },
       rows: [headerRow, ...tableRows],
     });
@@ -321,7 +352,11 @@ export class DocxConverter {
       if (cleanText.trim()) {
         elements.push(
           new Paragraph({
-            children: [new TextRun({ text: cleanText })],
+            children: [new TextRun({ 
+              text: cleanText,
+              font: "Times New Roman", // Fonte padrão ABNT
+              color: "000000" // Preto
+            })],
             spacing: { after: 200 }
           })
         );
@@ -332,99 +367,99 @@ export class DocxConverter {
   }
 
   private parseHtmlStructure(html: string): any[] {
-  const blocks: any[] = [];
-  let currentList: any[] = [];
-  let currentListType: 'ul' | 'ol' | null = null;
-  let i = 0;
+    const blocks: any[] = [];
+    let currentList: any[] = [];
+    let currentListType: 'ul' | 'ol' | null = null;
+    let i = 0;
 
-  while (i < html.length) {
-    if (html[i] === '<') {
-      const tagEnd = html.indexOf('>', i);
-      if (tagEnd === -1) break;
+    while (i < html.length) {
+      if (html[i] === '<') {
+        const tagEnd = html.indexOf('>', i);
+        if (tagEnd === -1) break;
 
-      const fullTag = html.substring(i, tagEnd + 1);
-      const tagName = fullTag.replace(/[<\/>]/g, '').split(' ')[0].toLowerCase();
+        const fullTag = html.substring(i, tagEnd + 1);
+        const tagName = fullTag.replace(/[<\/>]/g, '').split(' ')[0].toLowerCase();
 
-      if (tagName === 'ul' || tagName === 'ol') {
-        if (fullTag.startsWith('</')) {
-          // Fechar lista
-          if (currentList.length > 0 && currentListType) {
-            blocks.push({
-              type: 'list',
-              listType: currentListType,
-              items: [...currentList]
-            });
+        if (tagName === 'ul' || tagName === 'ol') {
+          if (fullTag.startsWith('</')) {
+            // Fechar lista
+            if (currentList.length > 0 && currentListType) {
+              blocks.push({
+                type: 'list',
+                listType: currentListType,
+                items: [...currentList]
+              });
+            }
+            currentList = [];
+            currentListType = null;
+          } else {
+            // Abrir lista
+            currentListType = tagName as 'ul' | 'ol';
+            currentList = [];
           }
-          currentList = [];
-          currentListType = null;
-        } else {
-          // Abrir lista
-          currentListType = tagName as 'ul' | 'ol';
-          currentList = [];
-        }
-        i = tagEnd + 1;
-      } else if (tagName === 'li') {
-        if (!fullTag.startsWith('</')) {
-          // Encontrar o fechamento </li>
-          const liEnd = html.indexOf('</li>', tagEnd);
-          if (liEnd === -1) break;
-
-          const liContent = html.substring(tagEnd + 1, liEnd);
-          if (liContent.trim() && currentListType) {
-            currentList.push(liContent.trim());
-          }
-          i = liEnd + 5; // Avançar após </li>
-        } else {
           i = tagEnd + 1;
-        }
-      } else if (tagName === 'p') {
-        if (!fullTag.startsWith('</')) {
-          // Encontrar o fechamento </p>
-          const pEnd = html.indexOf('</p>', tagEnd);
-          if (pEnd === -1) break;
+        } else if (tagName === 'li') {
+          if (!fullTag.startsWith('</')) {
+            // Encontrar o fechamento </li>
+            const liEnd = html.indexOf('</li>', tagEnd);
+            if (liEnd === -1) break;
 
-          const pContent = html.substring(tagEnd + 1, pEnd);
-          if (pContent.trim()) {
-            blocks.push({
-              type: 'paragraph',
-              content: pContent.trim()
-            });
+            const liContent = html.substring(tagEnd + 1, liEnd);
+            if (liContent.trim() && currentListType) {
+              currentList.push(liContent.trim());
+            }
+            i = liEnd + 5; // Avançar após </li>
+          } else {
+            i = tagEnd + 1;
           }
-          i = pEnd + 4; // Avançar após </p>
+        } else if (tagName === 'p') {
+          if (!fullTag.startsWith('</')) {
+            // Encontrar o fechamento </p>
+            const pEnd = html.indexOf('</p>', tagEnd);
+            if (pEnd === -1) break;
+
+            const pContent = html.substring(tagEnd + 1, pEnd);
+            if (pContent.trim()) {
+              blocks.push({
+                type: 'paragraph',
+                content: pContent.trim()
+              });
+            }
+            i = pEnd + 4; // Avançar após </p>
+          } else {
+            i = tagEnd + 1;
+          }
         } else {
+          // Outras tags - pular
           i = tagEnd + 1;
         }
       } else {
-        // Outras tags - pular
-        i = tagEnd + 1;
-      }
-    } else {
-      // Texto fora de tags - procurar próxima tag
-      const nextTag = html.indexOf('<', i);
-      if (nextTag === -1) break;
+        // Texto fora de tags - procurar próxima tag
+        const nextTag = html.indexOf('<', i);
+        if (nextTag === -1) break;
 
-      const textContent = html.substring(i, nextTag).trim();
-      if (textContent) {
-        blocks.push({
-          type: 'paragraph',
-          content: textContent
-        });
+        const textContent = html.substring(i, nextTag).trim();
+        if (textContent) {
+          blocks.push({
+            type: 'paragraph',
+            content: textContent
+          });
+        }
+        i = nextTag;
       }
-      i = nextTag;
     }
-  }
 
-  // Se ainda houver lista aberta
-  if (currentList.length > 0 && currentListType) {
-    blocks.push({
-      type: 'list',
-      listType: currentListType,
-      items: [...currentList]
-    });
-  }
+    // Se ainda houver lista aberta
+    if (currentList.length > 0 && currentListType) {
+      blocks.push({
+        type: 'list',
+        listType: currentListType,
+        items: [...currentList]
+      });
+    }
 
-  return blocks;
-}
+    return blocks;
+  }
 
   private createListElements(listItems: string[], listType: 'ul' | 'ol'): any[] {
     const elements: any[] = [];
@@ -437,7 +472,9 @@ export class DocxConverter {
         // Adicionar o bullet/numero como primeiro TextRun
         const bulletRun = new TextRun({
           text: `${bullet} `,
-          bold: true
+          bold: true,
+          font: "Times New Roman",
+          color: "000000" // Preto
         });
 
         elements.push(
@@ -469,15 +506,15 @@ export class DocxConverter {
   private preprocessHtml(html: string): string {
     return html
       .replace(/<p><br\s*\/?><\/p>/gi, '') // Remover parágrafos vazios com br
-    .replace(/<div>/gi, '<p>')
-    .replace(/<\/div>/gi, '</p>')
-    .replace(/<br\s*\/?>/gi, ' ') // Substituir br por espaço
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&#160;/gi, ' ')
-    .replace(/<p>\s*<\/p>/gi, '') // Remover parágrafos vazios
-    .replace(/\n/g, ' ') // Remover quebras de linha
-    .replace(/\s+/g, ' ') // Normalizar espaços
-    .trim();
+      .replace(/<div>/gi, '<p>')
+      .replace(/<\/div>/gi, '</p>')
+      .replace(/<br\s*\/?>/gi, ' ') // Substituir br por espaço
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&#160;/gi, ' ')
+      .replace(/<p>\s*<\/p>/gi, '') // Remover parágrafos vazios
+      .replace(/\n/g, ' ') // Remover quebras de linha
+      .replace(/\s+/g, ' ') // Normalizar espaços
+      .trim();
   }
 
   private convertHtmlToParagraph(html: string): Paragraph | null {
@@ -556,7 +593,11 @@ export class DocxConverter {
   }
 
   private createTextRun(text: string, bold: boolean, italic: boolean, underline: boolean): TextRun {
-    const options: any = { text: text.trim() };
+    const options: any = { 
+      text: text.trim(),
+      font: "Times New Roman", // Fonte padrão ABNT
+      color: "000000" // Preto
+    };
 
     if (bold) options.bold = true;
     if (italic) options.italics = true;

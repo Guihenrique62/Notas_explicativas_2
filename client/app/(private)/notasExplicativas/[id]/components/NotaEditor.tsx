@@ -133,7 +133,7 @@ export default function NotaEditor({
 }: NotaEditorProps) {
   const [tabelas, setTabelas] = useState<TabelaDemonstrativa[]>([]);
 
-  // Inicializa as tabelas quando a nota selecionada muda ou o dialog abre
+  // Inicializa as tabeluzuudxtpmqjnas quando a nota selecionada muda ou o dialog abre
   useEffect(() => {
     if (selectedNota && visible) {
       setTabelas(selectedNota.tabelas || []);

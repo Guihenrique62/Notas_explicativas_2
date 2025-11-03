@@ -8,6 +8,7 @@ import configRoutes from './routes/mapping/configCompanyRoutes'
 import notasRoutes from './routes/notasRoutes'
 import exportRoutes from './routes/exportRoutes'
 import tabelaDemonstrativaRoutes from './routes/tbDemoRoutes'
+import commentsRoutes from './routes/commentsRoutes'
 import authRoutes from './routes/authRoutes'
 import cookieParser from "cookie-parser";
 import cors from 'cors'
@@ -51,6 +52,7 @@ app.use("/balanco", balancoRoutes)
 app.use("/dre", dreRoutes)
 app.use("/config", configRoutes)
 app.use("/notas", notasRoutes)
+app.use("/comments", commentsRoutes);
 app.use("/demoTable", tabelaDemonstrativaRoutes);
 app.use("/export", exportRoutes);
 app.use("/auth", authRoutes)
