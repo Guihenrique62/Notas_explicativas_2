@@ -4,7 +4,7 @@ import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { NotaExplicativa } from "../types";
 import { useComments } from "../hooks/useComments";
 import { ComentarioItem } from "./ComentarioItem";
@@ -28,6 +28,29 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
     excluirComentario
   } = useComments(toast);
 
+  // Atualiza o total quando comentários são adicionados/removidos no modal
+  const handleAdicionarComentario = async () => {
+    if (!selectedNota || !novoComentario.trim()) return;
+
+    const success = await adicionarComentario(selectedNota.id, novoComentario);
+    if (success) {
+      setNovoComentario("");
+      // Atualiza o total localmente - AGORA USA totalComentarios DA NOTA
+      if (selectedNota.totalComentarios !== undefined) {
+        selectedNota.totalComentarios += 1;
+      }
+    }
+  };
+
+  const handleExcluirComentario = async (comentarioId: string) => {
+    if (!selectedNota) return;
+    await excluirComentario(comentarioId, selectedNota.id);
+    // Atualiza o total localmente - AGORA USA totalComentarios DA NOTA
+    if (selectedNota.totalComentarios !== undefined && selectedNota.totalComentarios > 0) {
+      selectedNota.totalComentarios -= 1;
+    }
+  };
+
   const handleDeleteClick = (nota: NotaExplicativa) => {
     confirmDialog({
       message: `Tem certeza que deseja deletar a nota "${nota.title}"? Esta ação não pode ser desfeita.`,
@@ -44,20 +67,6 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
     
     setShowComentariosModal(true);
     await carregarComentarios(selectedNota.id);
-  };
-
-  const handleAdicionarComentario = async () => {
-    if (!selectedNota || !novoComentario.trim()) return;
-
-    const success = await adicionarComentario(selectedNota.id, novoComentario);
-    if (success) {
-      setNovoComentario("");
-    }
-  };
-
-  const handleExcluirComentario = async (comentarioId: string) => {
-    if (!selectedNota) return;
-    await excluirComentario(comentarioId, selectedNota.id);
   };
 
   const formatCurrency = (value: number | null) => {
@@ -120,13 +129,32 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
             </div>
             
             <div className="flex gap-2 flex-shrink-0">
-              <Button
-                icon="pi pi-comments"
-                tooltip="Comentários"
-                tooltipOptions={{ position: 'top' }}
-                className="p-button-outlined p-button-info p-button-sm"
-                onClick={handleOpenComentarios}
-              />
+              {/* Botão de Comentários com Indicador - USA totalComentarios DA NOTA */}
+              <div className="relative" style={{ position: 'relative', display: 'inline-block' }}>
+                <Button
+                  icon="pi pi-comments"
+                  tooltip="Comentários"
+                  tooltipOptions={{ position: 'top' }}
+                  className="p-button-outlined p-button-info p-button-sm"
+                  onClick={handleOpenComentarios}
+                />
+                {/* Indicador de comentários - USA totalComentarios DA NOTA */}
+                {selectedNota.totalComentarios > 0 && (
+                  <span 
+                    className="absolute bg-red-500 text-white text-xs rounded-full w-5 h-5 flex align-items-center justify-content-center shadow-md"
+                    style={{ 
+                      top: '-8px', 
+                      right: '-8px',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      zIndex: 10
+                    }}
+                  >
+                    {selectedNota.totalComentarios}
+                  </span>
+                )}
+              </div>
+              
               <Button
                 icon="pi pi-pencil"
                 label="Editar"
@@ -188,7 +216,7 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
         footer={footerComentariosModal}
         onHide={() => {
           setShowComentariosModal(false);
-          setNovoComentario(""); // Limpa o campo ao fechar
+          setNovoComentario("");
         }}
       >
         <div className="flex flex-column gap-3">

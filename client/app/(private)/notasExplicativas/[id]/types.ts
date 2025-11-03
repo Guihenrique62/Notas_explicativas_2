@@ -6,6 +6,7 @@ export interface NotaExplicativa {
   createdAt: string;
   updatedAt: string;
   tabelas: TabelaDemonstrativa[];
+  totalComentarios: number;
 }
 // Adicione ao seu arquivo types.ts
 export interface Comentario {
