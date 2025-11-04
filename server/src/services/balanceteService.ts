@@ -25,17 +25,6 @@ export const createBalancete = async (data: uploadInput) => {
 
   if (!company) throw new NotFoundError("Empresa com este ID não existe no banco de dados!");
 
-  // REMOVER o processamento de mapeamentos - os dados já foram processados no frontend
-  // const mappings = await prisma.configMapping.findMany({
-  //   where: { companyId: data.companyId },
-  //   include: {
-  //     defaultAccount: true
-  //   }
-  // });
-
-  // REMOVER - não processar novamente
-  // const processedData = processMappedData(data.balanceteData, mappings);
-
   // Verificar se já existe balancete para esta empresa e data de referência
   const existingBalancete = await prisma.balanceteData.findFirst({
     where: {
@@ -147,19 +136,14 @@ export const listContasUnicasBalancete = async (companyId: string) => {
       select: {
         accountingAccount: true,
         accountName: true,
+        id: true
       },
       orderBy: {
         accountingAccount: 'asc'
       }
     });
 
-    // Formatar para retornar um array de objetos com código e nome
-    const contasFormatadas = contas.map(conta => ({
-      codigo: conta.accountingAccount,
-      nome: conta.accountName
-    }));
-
-    return contasFormatadas;
+    return contas;
   } catch (error) {
     console.error('Erro ao buscar contas únicas:', error);
     throw error;

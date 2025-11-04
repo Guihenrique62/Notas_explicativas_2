@@ -67,6 +67,7 @@ model BalanceteData {
 
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tabelasDemonstrativas TabelaDemonstrativa[] @relation("TabelaDemonstrativaBalancete")
 
   // Indexes para otimizar consultas
   @@index([companyId, referenceDate])
@@ -187,8 +188,9 @@ model TabelaDemonstrativa {
   conta        String   // Nome da conta
   anoAnterior  Float?   // Valor do ano anterior
   anoAtual     Float?   // Valor do ano atual
-  
   ordem        Int      // Ordem de exibição na tabela
+
+  contasVinculadas BalanceteData[] @relation("TabelaDemonstrativaBalancete")
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

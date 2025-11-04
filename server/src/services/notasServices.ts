@@ -207,6 +207,9 @@ export const reorderNotas = async (companyId: string, novasOrdens: { id: string;
         },
         include: {
           tabelas: {
+            include: {
+              contasVinculadas: true
+            },
             orderBy: {
               ordem: 'asc'
             }

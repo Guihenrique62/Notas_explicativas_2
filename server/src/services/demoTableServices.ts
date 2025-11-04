@@ -7,6 +7,7 @@ export interface CreateTabelaData {
   anoAnterior: number | null;
   anoAtual: number | null;
   ordem: number;
+  contasVinculadasIds?: string[];
 }
 
 export interface UpdateTabelaData {
@@ -14,6 +15,7 @@ export interface UpdateTabelaData {
   anoAnterior?: number | null;
   anoAtual?: number | null;
   ordem?: number;
+  contasVinculadasIds?: string[];
 }
 
 
@@ -21,7 +23,10 @@ export const getTabelasByNota = async (notaId: string) => {
     try {
       const tabelas = await prisma.tabelaDemonstrativa.findMany({
         where: { notaId },
-        orderBy: { ordem: 'asc' }
+        orderBy: { ordem: 'asc' },
+        include: {
+          contasVinculadas: true
+        }
       });
 
       return tabelas;
@@ -51,9 +56,17 @@ export const createTabela = async (notaId: string, data: CreateTabelaData) => {
           conta: data.conta,
           anoAnterior: data.anoAnterior,
           anoAtual: data.anoAtual,
-          ordem: data.ordem
-        }
-      });
+          ordem: data.ordem,
+          contasVinculadas: data.contasVinculadasIds && data.contasVinculadasIds.length > 0 
+          ? {
+              connect: data.contasVinculadasIds.map(id => ({ id }))
+            }
+          : undefined
+      },
+      include: {
+        contasVinculadas: true
+      }
+    });
 
       return tabela;
     } catch (error) {
@@ -70,10 +83,24 @@ export const createTabela = async (notaId: string, data: CreateTabelaData) => {
       const tabela = await prisma.tabelaDemonstrativa.update({
         where: { id },
         data: {
-          ...data,
-          updatedAt: new Date()
-        }
-      });
+          conta: data.conta,
+          anoAnterior: data.anoAnterior,
+          anoAtual: data.anoAtual,
+          ordem: data.ordem,
+          updatedAt: new Date(),
+          contasVinculadas: data.contasVinculadasIds !== undefined
+          ? {
+              // Primeiro desconecta todas as contas atuais
+              set: [],
+              // Depois conecta as novas contas
+              connect: data.contasVinculadasIds.map(contaId => ({ id: contaId }))
+            }
+          : undefined
+      },
+      include: {
+        contasVinculadas: true
+      }
+    });
 
       return tabela;
     } catch (error) {

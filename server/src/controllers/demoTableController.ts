@@ -14,13 +14,14 @@ export const getByNota = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
   try {
     const { notaId } = req.params;
-    const { conta, anoAnterior, anoAtual, ordem } = req.body;
+    const { conta, anoAnterior, anoAtual, ordem, contasVinculadasIds } = req.body;
 
     const tabela = await tabelaDemonstrativaService.createTabela(notaId, {
       conta,
       anoAnterior: anoAnterior !== null ? parseFloat(anoAnterior) : null,
       anoAtual: anoAtual !== null ? parseFloat(anoAtual) : null,
-      ordem: parseInt(ordem)
+      ordem: parseInt(ordem),
+      contasVinculadasIds: contasVinculadasIds
     });
 
     return res.status(201).json(tabela);
@@ -32,13 +33,14 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { conta, anoAnterior, anoAtual, ordem } = req.body;
+    const { conta, anoAnterior, anoAtual, ordem, contasVinculadasIds } = req.body;
 
     const tabela = await tabelaDemonstrativaService.updateTabela(id, {
       conta,
       anoAnterior: anoAnterior !== undefined ? parseFloat(anoAnterior) : undefined,
       anoAtual: anoAtual !== undefined ? parseFloat(anoAtual) : undefined,
-      ordem: ordem !== undefined ? parseInt(ordem) : undefined
+      ordem: ordem !== undefined ? parseInt(ordem) : undefined,
+      contasVinculadasIds: contasVinculadasIds
     });
 
     return res.json(tabela);

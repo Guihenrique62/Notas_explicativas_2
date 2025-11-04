@@ -90,6 +90,11 @@ export class DocxConverter {
       })
     );
 
+    // Tabela demonstrativa
+    if (nota.tabelas && nota.tabelas.length > 0) {
+      section.push(...this.createTabelaSection(nota.tabelas));
+    }
+
     // Conteúdo da nota
     if (nota.content && this.hasMeaningfulContent(nota.content)) {
       const contentElements = this.parseHtmlContent(nota.content);
@@ -110,15 +115,13 @@ export class DocxConverter {
             type: ShadingType.CLEAR,
             color: "f8f9fa",
             fill: "f8f9fa"
-          }
+          },
+          spacing: { before: 400, after: 200 }
         })
       );
     }
 
-    // Tabela demonstrativa
-    if (nota.tabelas && nota.tabelas.length > 0) {
-      section.push(...this.createTabelaSection(nota.tabelas));
-    }
+    
 
     // Separador entre notas
     if (index < totalNotas - 1) {
@@ -158,170 +161,253 @@ export class DocxConverter {
     return section;
   }
 
-  private createTable(tabelas: any[]): Table {
+private createTable(tabelas: any[]): Table {
     // Cabeçalho da tabela - ABNT: Fundo cinza, texto preto
     const headerRow = new TableRow({
-      children: [
-        new TableCell({
-          children: [new Paragraph({
-            children: [new TextRun({ 
-              text: "Conta", 
-              bold: true,
-              color: "000000", // Preto
-              font: "Times New Roman"
-            })],
-            alignment: AlignmentType.CENTER
-          })],
-          shading: {
-            type: ShadingType.CLEAR,
-            color: "d9d9d9", // Cinza claro
-            fill: "d9d9d9"
-          },
-          margins: {
-            top: 100,
-            bottom: 100,
-            left: 100,
-            right: 100
-          }
-        }),
-        new TableCell({
-          children: [new Paragraph({
-            children: [new TextRun({ 
-              text: "Ano Anterior", 
-              bold: true,
-              color: "000000", // Preto
-              font: "Times New Roman"
-            })],
-            alignment: AlignmentType.CENTER
-          })],
-          shading: {
-            type: ShadingType.CLEAR,
-            color: "d9d9d9",
-            fill: "d9d9d9"
-          },
-          margins: {
-            top: 100,
-            bottom: 100,
-            left: 100,
-            right: 100
-          }
-        }),
-        new TableCell({
-          children: [new Paragraph({
-            children: [new TextRun({ 
-              text: "Ano Atual", 
-              bold: true,
-              color: "000000", // Preto
-              font: "Times New Roman"
-            })],
-            alignment: AlignmentType.CENTER
-          })],
-          shading: {
-            type: ShadingType.CLEAR,
-            color: "d9d9d9",
-            fill: "d9d9d9"
-          },
-          margins: {
-            top: 100,
-            bottom: 100,
-            left: 100,
-            right: 100
-          }
-        })
-      ],
-      tableHeader: true
+        children: [
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: "Conta", 
+                        bold: true,
+                        color: "000000", // Preto
+                        font: "Times New Roman"
+                    })],
+                    alignment: AlignmentType.CENTER
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "d9d9d9", // Cinza claro
+                    fill: "d9d9d9"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            }),
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: "Ano Anterior", 
+                        bold: true,
+                        color: "000000", // Preto
+                        font: "Times New Roman"
+                    })],
+                    alignment: AlignmentType.CENTER
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "d9d9d9",
+                    fill: "d9d9d9"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            }),
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: "Ano Atual", 
+                        bold: true,
+                        color: "000000", // Preto
+                        font: "Times New Roman"
+                    })],
+                    alignment: AlignmentType.CENTER
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "d9d9d9",
+                    fill: "d9d9d9"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            })
+        ],
+        tableHeader: true
     });
+
+    // Calcular totais
+    let totalAnoAnterior = 0;
+    let totalAnoAtual = 0;
 
     // Linhas da tabela
     const tableRows = tabelas.map((tabela, index) => {
-      const isEven = index % 2 === 0;
-      
-      return new TableRow({
+        const isEven = index % 2 === 0;
+        
+        // Somar valores para o total (considerando apenas valores numéricos)
+        if (typeof tabela.anoAnterior === 'number') {
+            totalAnoAnterior += tabela.anoAnterior;
+        }
+        if (typeof tabela.anoAtual === 'number') {
+            totalAnoAtual += tabela.anoAtual;
+        }
+        
+        return new TableRow({
+            children: [
+                new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ 
+                            text: tabela.conta || '',
+                            bold: true,
+                            color: "000000", // Preto
+                            font: "Times New Roman"
+                        })]
+                    })],
+                    shading: isEven ? {
+                        type: ShadingType.CLEAR,
+                        color: "f2f2f2", // Cinzo muito claro para zebrado
+                        fill: "f2f2f2"
+                    } : undefined,
+                    margins: {
+                        top: 100,
+                        bottom: 100,
+                        left: 100,
+                        right: 100
+                    }
+                }),
+                new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ 
+                            text: tabela.anoAnterior ? this.formatCurrency(tabela.anoAnterior) : '-',
+                            font: "Times New Roman", // Fonte padrão ABNT
+                            color: "000000" // Preto para valores normais
+                        })],
+                        alignment: AlignmentType.RIGHT
+                    })],
+                    shading: isEven ? {
+                        type: ShadingType.CLEAR,
+                        color: "f2f2f2",
+                        fill: "f2f2f2"
+                    } : undefined,
+                    margins: {
+                        top: 100,
+                        bottom: 100,
+                        left: 100,
+                        right: 100
+                    }
+                }),
+                new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ 
+                            text: tabela.anoAtual ? this.formatCurrency(tabela.anoAtual) : '-',
+                            font: "Times New Roman", // Fonte padrão ABNT
+                            color: "000000" // Preto para valores normais
+                        })],
+                        alignment: AlignmentType.RIGHT
+                    })],
+                    shading: isEven ? {
+                        type: ShadingType.CLEAR,
+                        color: "f2f2f2",
+                        fill: "f2f2f2"
+                    } : undefined,
+                    margins: {
+                        top: 100,
+                        bottom: 100,
+                        left: 100,
+                        right: 100
+                    }
+                })
+            ]
+        });
+    });
+
+    // Linha de Total
+    const totalRow = new TableRow({
         children: [
-          new TableCell({
-            children: [new Paragraph({
-              children: [new TextRun({ 
-                text: tabela.conta || '',
-                bold: true,
-                color: "000000", // Preto
-                font: "Times New Roman"
-              })]
-            })],
-            shading: isEven ? {
-              type: ShadingType.CLEAR,
-              color: "f2f2f2", // Cinzo muito claro para zebrado
-              fill: "f2f2f2"
-            } : undefined,
-            margins: {
-              top: 100,
-              bottom: 100,
-              left: 100,
-              right: 100
-            }
-          }),
-          new TableCell({
-            children: [new Paragraph({
-              children: [new TextRun({ 
-                text: tabela.anoAnterior ? this.formatCurrency(tabela.anoAnterior) : '-',
-                font: "Times New Roman", // Fonte padrão ABNT
-                color: "000000" // Preto para valores normais
-              })],
-              alignment: AlignmentType.RIGHT
-            })],
-            shading: isEven ? {
-              type: ShadingType.CLEAR,
-              color: "f2f2f2",
-              fill: "f2f2f2"
-            } : undefined,
-            margins: {
-              top: 100,
-              bottom: 100,
-              left: 100,
-              right: 100
-            }
-          }),
-          new TableCell({
-            children: [new Paragraph({
-              children: [new TextRun({ 
-                text: tabela.anoAtual ? this.formatCurrency(tabela.anoAtual) : '-',
-                font: "Times New Roman", // Fonte padrão ABNT
-                color: "000000" // Preto para valores normais
-              })],
-              alignment: AlignmentType.RIGHT
-            })],
-            shading: isEven ? {
-              type: ShadingType.CLEAR,
-              color: "f2f2f2",
-              fill: "f2f2f2"
-            } : undefined,
-            margins: {
-              top: 100,
-              bottom: 100,
-              left: 100,
-              right: 100
-            }
-          })
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: "Total",
+                        bold: true,
+                        color: "000000", // Preto
+                        font: "Times New Roman"
+                    })]
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "e6e6e6", // Cinza um pouco mais escuro para destacar o total
+                    fill: "e6e6e6"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            }),
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: this.formatCurrency(totalAnoAnterior),
+                        bold: true,
+                        font: "Times New Roman",
+                        color: "000000" // Preto
+                    })],
+                    alignment: AlignmentType.RIGHT
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "e6e6e6",
+                    fill: "e6e6e6"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            }),
+            new TableCell({
+                children: [new Paragraph({
+                    children: [new TextRun({ 
+                        text: this.formatCurrency(totalAnoAtual),
+                        bold: true,
+                        font: "Times New Roman",
+                        color: "000000" // Preto
+                    })],
+                    alignment: AlignmentType.RIGHT
+                })],
+                shading: {
+                    type: ShadingType.CLEAR,
+                    color: "e6e6e6",
+                    fill: "e6e6e6"
+                },
+                margins: {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                }
+            })
         ]
-      });
     });
 
     return new Table({
-      width: {
-        size: 100,
-        type: WidthType.PERCENTAGE,
-      },
-      columnWidths: [5000, 2500, 2500],
-      borders: {
-        top: { style: BorderStyle.SINGLE, size: 1, color: "000000" }, // Preto
-        bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-        left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-        right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-        insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-        insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
-      },
-      rows: [headerRow, ...tableRows],
+        width: {
+            size: 100,
+            type: WidthType.PERCENTAGE,
+        },
+        columnWidths: [5000, 2500, 2500],
+        borders: {
+            top: { style: BorderStyle.NONE, size: 0, color: "000000" }, // Preto
+            bottom: { style: BorderStyle.NONE, size: 0, color: "000000" },
+            left: { style: BorderStyle.NONE, size: 0, color: "000000" },
+            right: { style: BorderStyle.NONE, size: 0, color: "000000" },
+            insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "000000" },
+            insideVertical: { style: BorderStyle.NONE, size: 0, color: "000000" },
+        },
+        rows: [headerRow, ...tableRows, totalRow],
     });
-  }
+}
 
   private parseHtmlContent(html: string): any[] {
     const elements: any[] = [];
@@ -526,7 +612,7 @@ export class DocxConverter {
 
     return new Paragraph({
       children: textRuns,
-      spacing: { after: 200 }
+      spacing: { before: 400, after: 200 }
     });
   }
 
@@ -627,14 +713,13 @@ export class DocxConverter {
   }
 
   private formatCurrency(value: number): string {
+    
     const formatted = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(Math.abs(value));
     
-    return value < 0 ? `- ${formatted}` : formatted;
+    return value < 0 ? `(${formatted})` : formatted;
   }
 
   private async saveDocument(doc: Document): Promise<Buffer> {
