@@ -1,3 +1,4 @@
+// src/types/index.ts
 export interface NotaExplicativa {
   id: string;
   number: number;
@@ -8,7 +9,7 @@ export interface NotaExplicativa {
   tabelas: TabelaDemonstrativa[];
   totalComentarios: number;
 }
-// Adicione ao seu arquivo types.ts
+
 export interface Comentario {
   id: string;
   notaId: string;
@@ -29,9 +30,26 @@ export interface NotasExplicativasPageProps {
   };
 }
 
+// Interface para as contas do balancete (retorno da API /balancete/companyId/contas)
 export interface ContaBalancete {
-  codigo: string;
-  nome: string;
+  id: string;
+  accountingAccount: string;
+  accountName: string;
+}
+
+// Interface para os dados completos do balancete
+export interface DadosBalancete {
+  id: string;
+  accountingAccount: string;
+  accountName: string;
+  previousBalance: number;
+  currentBalance: number;
+  debit?: number;
+  credit?: number;
+  monthBalance?: number;
+  referenceDate: number;
+  uploadedAt: string;
+  companyId: string;
 }
 
 export interface TabelaDemonstrativa {
@@ -40,15 +58,5 @@ export interface TabelaDemonstrativa {
   anoAnterior: number | null;
   anoAtual: number | null;
   ordem: number;
-}
-
-
-export interface DadosBalancete {
-  previousBalance: number;
-  currentBalance: number;
-  accountingAccount: string;
-  accountName: string;
-  debit?: number;
-  credit?: number;
-  monthBalance?: number;
+  contasVinculadas?: ContaBalancete[]; // Agora usa ContaBalancete em vez de DadosBalancete
 }

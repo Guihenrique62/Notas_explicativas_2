@@ -138,6 +138,7 @@ export default function NotaEditor({
     if (selectedNota && visible) {
       setTabelas(selectedNota.tabelas || []);
     }
+    console.log('Nota selecionada:', selectedNota, visible);
   }, [selectedNota, visible]);
 
   const handleTabelasChange = (novasTabelas: TabelaDemonstrativa[]) => {

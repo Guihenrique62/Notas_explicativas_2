@@ -12,6 +12,7 @@ interface UseNotasReturn {
   exportToWord: () => Promise<void>;
 }
 
+
 export const useNotas = (companyId: string): UseNotasReturn => {
   const [notas, setNotas] = useState<NotaExplicativa[]>([]);
   const [loading, setLoading] = useState(true);

@@ -187,7 +187,7 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
                 <table className="w-full" style={{ borderCollapse: 'collapse' }}>
                   <thead>
                     <tr className="border-bottom-1 surface-border">
-                      <th className="text-left p-2 font-semibold bg-gray-50">Conta</th>
+                      <th className="text-left p-2 font-semibold bg-gray-50">Nomenclatura</th>
                       <th className="text-right p-2 font-semibold bg-gray-50">Ano Anterior</th>
                       <th className="text-right p-2 font-semibold bg-gray-50">Ano Atual</th>
                     </tr>

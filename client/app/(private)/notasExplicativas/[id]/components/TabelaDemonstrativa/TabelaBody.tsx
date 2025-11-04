@@ -8,7 +8,7 @@ interface TabelaBodyProps {
   loadingContas: boolean;
   anoAnterior: number;
   anoAtual: number;
-  onContaSelect: (id: string, codigoConta: string) => void;
+  onContaSelect: (id: string, contasSelecionadas: ContaBalancete[]) => void;
   onUpdateRow: (id: string, field: string, value: any) => void;
   onDeleteRow: (id: string) => void;
 }
@@ -30,13 +30,16 @@ export default function TabelaBody({
           <table className="p-datatable-table w-full">
             <thead>
               <tr>
-                <th className="p-column-header" style={{ width: '40%' }}>
-                  <span className="p-column-title">Conta</span>
+                <th className="p-column-header" style={{ width: '30%' }}>
+                  <span className="p-column-title">Nomenclatura</span>
                 </th>
-                <th className="p-column-header text-right" style={{ width: '25%' }}>
+                <th className="p-column-header" style={{ width: '30%' }}>
+                  <span className="p-column-title">{"Conta(s)"}</span>
+                </th>
+                <th className="p-column-header text-right" style={{ width: '15%' }}>
                   <span className="p-column-title">Ano Anterior ({anoAnterior})</span>
                 </th>
-                <th className="p-column-header text-right" style={{ width: '25%' }}>
+                <th className="p-column-header text-right" style={{ width: '15%' }}>
                   <span className="p-column-title">Ano Atual ({anoAtual})</span>
                 </th>
                 <th className="p-column-header" style={{ width: '10%' }}>
@@ -47,7 +50,7 @@ export default function TabelaBody({
             <tbody>
               {tabelas.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center p-4 text-color-secondary">
+                  <td colSpan={5} className="text-center p-4 text-color-secondary">
                     Nenhuma linha adicionada. Clique em Adicionar Linha para começar.
                   </td>
                 </tr>
