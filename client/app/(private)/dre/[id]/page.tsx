@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dre } from "../types";
 import DreTable from "./components/dreTable";
+import ShowCentsInput from "../../globalComponents/ShowCentsInput";
 
 
 const BalancoPage = () => {
@@ -89,16 +90,7 @@ const BalancoPage = () => {
               <span className="text-lg text-color-secondary">Ano: {year}</span>
             </div>
 
-             <div className="flex align-items-center gap-2">
-              <label htmlFor="showCents" className="text-sm font-medium">
-                Mostrar centavos
-              </label>
-              <InputSwitch
-                id="showCents"
-                checked={showCents}
-                onChange={(e) => setShowCents(e.value)}
-              />
-            </div>
+             <ShowCentsInput companyId={params.id} showCents={showCents} setShowCents={setShowCents} />
 
           </div>
         </div>

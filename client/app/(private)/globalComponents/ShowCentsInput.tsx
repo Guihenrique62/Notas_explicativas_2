@@ -34,14 +34,13 @@ export const fetchCompanyPlan = async (companyId: string) => {
 };
 
 
-const ShowCentsInput = ({ companyId }: { companyId: string }) => {
-  const [checked, setChecked] = useState(false);
+const ShowCentsInput = ({ companyId, showCents, setShowCents }: { companyId: string, showCents: boolean, setShowCents: (value: boolean) => void }) => {
 
   useEffect(()=> {
     fetchCompanyPlan(companyId).then(
       (data) => {
         if(data) {
-          setChecked(data.showCents);
+          setShowCents(data.showCents);
         }
       }
     )
@@ -49,8 +48,8 @@ const ShowCentsInput = ({ companyId }: { companyId: string }) => {
   return (
     <div className="flex items-center justify-between w-1/3 h-full gap-3 p-2">
       <span className="text-lg">Mostrar centavos</span>
-      <InputSwitch checked={checked} onChange={(e) => {
-        setChecked(e.value)
+      <InputSwitch checked={showCents} onChange={(e) => {
+        setShowCents(e.value)
         updateCompanyPlan(companyId)
         }} />
     </div>

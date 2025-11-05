@@ -2,6 +2,7 @@
 import ShowCentsInput from '@/app/(private)/globalComponents/ShowCentsInput';
 import { Button } from 'primereact/button';
 import { Tooltip } from 'primereact/tooltip';
+import { useState } from 'react';
 
 
 interface NotasHeaderProps {
@@ -21,6 +22,8 @@ export default function NotasHeader({
   totalNotas,
   exportLoading = false
 }: NotasHeaderProps) {
+
+  const [showCents, setShowCents] = useState(true);
   
   return (
     <div className="flex card mb-4 justify-content-between align-items-center mb-4">
@@ -39,7 +42,7 @@ export default function NotasHeader({
       
       <div className="flex gap-2">
 
-        <ShowCentsInput companyId={companyId} />
+        <ShowCentsInput companyId={companyId} showCents={showCents} setShowCents={setShowCents} />
 
         <Button
           icon="pi pi-refresh"
