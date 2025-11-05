@@ -53,11 +53,32 @@ export const checkCompanyPlan = async (req: Request, res: Response) => {
   }
 }
 
+export const checkCompanyShowCents = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const showCents = await companyService.checkCompanyShowCents(id)
+    res.json({ showCents: showCents })
+    
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : error });
+  }
+}
+
 export const updateCompanyPlan = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const updatedPlan = await companyService.updateCompanyPlan(id)
     res.json({ planOfCountsAgrocontar: updatedPlan })
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : error });
+  }
+}
+
+export const updateCompanyShowCents = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const updatedShowCents = await companyService.updateCompanyShowCents(id)
+    res.json({ showCents: updatedShowCents })
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : error });
   }

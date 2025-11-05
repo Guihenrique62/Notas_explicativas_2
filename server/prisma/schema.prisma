@@ -43,6 +43,7 @@ model Company {
   name      String
   cnpj      String   @unique
   planOfCountsAgrocontar Boolean @default(true)
+  showCents Boolean @default(true)
   createdAt DateTime @default(now())
 
   groups     GroupCompanies[] @relation("CompanyGroup")

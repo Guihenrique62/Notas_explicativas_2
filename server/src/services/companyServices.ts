@@ -68,6 +68,12 @@ export const checkCompanyPlan = async (companyId: string) => {
   return company.planOfCountsAgrocontar
 }
 
+export const checkCompanyShowCents = async (companyId: string) => {
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+  if (!company) throw new Error('Empresa não encontrada!')
+  return company.showCents
+}
+
 export const updateCompanyPlan = async (companyId: string) => {
   const company = await prisma.company.findUnique({ where: { id: companyId } })
   if (!company) throw new Error('Empresa não encontrada!')
@@ -75,6 +81,18 @@ export const updateCompanyPlan = async (companyId: string) => {
   const updatedCompany = await prisma.company.update({
     where: { id: companyId },
     data: { planOfCountsAgrocontar: !company.planOfCountsAgrocontar }
+  })
+
+  return updatedCompany
+}
+
+export const updateCompanyShowCents = async (companyId: string) => {
+  const company = await prisma.company.findUnique({ where: { id: companyId } })
+  if (!company) throw new Error('Empresa não encontrada!')
+  
+  const updatedCompany = await prisma.company.update({
+    where: { id: companyId },
+    data: { showCents: !company.showCents }
   })
 
   return updatedCompany
