@@ -3,7 +3,7 @@ import api from "@/app/api/api";
 import { InputSwitch } from "primereact/inputswitch";
 import { useEffect, useState } from "react";
 
-const updateCompanyPlan = async (companyId: string) => {
+const updateCompanyShowCents = async (companyId: string) => {
   try {
     const response = await api.put(`/companies/showCents/${companyId}`);
 
@@ -18,7 +18,7 @@ const updateCompanyPlan = async (companyId: string) => {
   }
 };
 
-export const fetchCompanyPlan = async (companyId: string) => {
+export const fetchCompanyShowCents = async (companyId: string) => {
   try {
     const response = await api.get(`/companies/showCents/${companyId}`);
 
@@ -37,7 +37,7 @@ export const fetchCompanyPlan = async (companyId: string) => {
 const ShowCentsInput = ({ companyId, showCents, setShowCents }: { companyId: string, showCents: boolean, setShowCents: (value: boolean) => void }) => {
 
   useEffect(()=> {
-    fetchCompanyPlan(companyId).then(
+    fetchCompanyShowCents(companyId).then(
       (data) => {
         if(data) {
           setShowCents(data.showCents);
@@ -50,7 +50,7 @@ const ShowCentsInput = ({ companyId, showCents, setShowCents }: { companyId: str
       <span className="text-lg">Mostrar centavos</span>
       <InputSwitch checked={showCents} onChange={(e) => {
         setShowCents(e.value)
-        updateCompanyPlan(companyId)
+        updateCompanyShowCents(companyId)
         }} />
     </div>
   );
