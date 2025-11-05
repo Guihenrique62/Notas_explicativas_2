@@ -13,9 +13,10 @@ interface NotaViewerProps {
   selectedNota: NotaExplicativa | null;
   onEdit: () => void;
   onDelete: (nota: NotaExplicativa) => void;
+  showCents: boolean;
 }
 
-export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewerProps) {
+export default function NotaViewer({ selectedNota, onEdit, onDelete, showCents }: NotaViewerProps) {
   const [showComentariosModal, setShowComentariosModal] = useState(false);
   const [novoComentario, setNovoComentario] = useState("");
   const toast = useRef<Toast>(null);
@@ -73,7 +74,9 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
     if (value === null || value === undefined) return '-';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
+      minimumFractionDigits: showCents ? 2 : 0,
+      maximumFractionDigits: showCents ? 2 : 0,
     }).format(value);
   };
 
@@ -131,6 +134,7 @@ export default function NotaViewer({ selectedNota, onEdit, onDelete }: NotaViewe
             <div className="flex gap-2 flex-shrink-0">
               {/* Botão de Comentários com Indicador - USA totalComentarios DA NOTA */}
               <div className="relative" style={{ position: 'relative', display: 'inline-block' }}>
+                
                 <Button
                   icon="pi pi-comments"
                   tooltip="Comentários"

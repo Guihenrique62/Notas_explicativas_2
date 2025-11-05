@@ -22,6 +22,7 @@ export default function NotasExplicativasPage({ params }: NotasExplicativasPageP
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
   const [exportLoading, setExportLoading] = useState(false);
+  const [showCents, setShowCents] = useState(true);
 
   // Hooks personalizados
   const { notas, loading, error, onReorder, refreshNotas, exportToWord} = useNotas(params.id);
@@ -148,6 +149,8 @@ export default function NotasExplicativasPage({ params }: NotasExplicativasPageP
           totalNotas={notas.length}
           exportLoading={exportLoading}
           companyId={params.id}
+          showCents={showCents}
+          setShowCents={setShowCents}
         />
 
         <div className="grid">
@@ -163,6 +166,7 @@ export default function NotasExplicativasPage({ params }: NotasExplicativasPageP
             selectedNota={selectedNota}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            showCents={showCents}
           />
         </div>
 

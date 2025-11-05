@@ -12,6 +12,8 @@ interface NotasHeaderProps {
   totalNotas?: number;
   exportLoading?: boolean;
   companyId: string;
+  showCents: boolean;
+  setShowCents: (value: boolean) => void;
 }
 
 export default function NotasHeader({ 
@@ -20,10 +22,10 @@ export default function NotasHeader({
   onCreateClick,
   onExportClick,
   totalNotas,
-  exportLoading = false
+  exportLoading = false,
+  showCents,
+  setShowCents
 }: NotasHeaderProps) {
-
-  const [showCents, setShowCents] = useState(true);
   
   return (
     <div className="flex card mb-4 justify-content-between align-items-center mb-4">
