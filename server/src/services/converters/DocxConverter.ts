@@ -16,9 +16,10 @@ import {
 } from 'docx';
 
 export class DocxConverter {
-  async convertNotasToDocx(notas: any[]): Promise<Buffer> {
+
+  async convertNotasToDocx(notas: any[], showCents: boolean): Promise<Buffer> {
     try {
-      const doc = this.createDocument(notas);
+      const doc = this.createDocument(notas, showCents);
       const buffer = await this.saveDocument(doc);
       return buffer;
     } catch (error) {
@@ -27,7 +28,7 @@ export class DocxConverter {
     }
   }
 
-  private createDocument(notas: any[]): Document {
+  private createDocument(notas: any[], showCents: boolean): Document {
     const children = [];
 
     // Título do documento - ABNT: Centralizado, negrito, tamanho maior
@@ -50,7 +51,7 @@ export class DocxConverter {
 
     // Conteúdo das notas
     notas.forEach((nota, index) => {
-      children.push(...this.createNotaSection(nota, index, notas.length));
+      children.push(...this.createNotaSection(nota, index, notas.length, showCents));
     });
 
     return new Document({
@@ -70,7 +71,7 @@ export class DocxConverter {
     });
   }
 
-  private createNotaSection(nota: any, index: number, totalNotas: number): any[] {
+  private createNotaSection(nota: any, index: number, totalNotas: number, showCents: boolean): any[] {
     const section = [];
 
     // Título da nota - ABNT: Preto, negrito, Times New Roman
@@ -92,7 +93,7 @@ export class DocxConverter {
 
     // Tabela demonstrativa
     if (nota.tabelas && nota.tabelas.length > 0) {
-      section.push(...this.createTabelaSection(nota.tabelas));
+      section.push(...this.createTabelaSection(nota.tabelas, showCents));
     }
 
     // Conteúdo da nota
@@ -143,7 +144,7 @@ export class DocxConverter {
     return section;
   }
 
-  private createTabelaSection(tabelas: any[]): any[] {
+  private createTabelaSection(tabelas: any[], showCents: boolean): any[] {
     const section = [];
     
     // Espaço antes da tabela
@@ -155,13 +156,13 @@ export class DocxConverter {
     );
 
     // Criar tabela
-    const table = this.createTable(tabelas);
+    const table = this.createTable(tabelas, showCents);
     section.push(table);
 
     return section;
   }
 
-private createTable(tabelas: any[]): Table {
+private createTable(tabelas: any[], showCents: boolean): Table {
     // Cabeçalho da tabela - ABNT: Fundo cinza, texto preto
     const headerRow = new TableRow({
         children: [
@@ -277,7 +278,7 @@ private createTable(tabelas: any[]): Table {
                 new TableCell({
                     children: [new Paragraph({
                         children: [new TextRun({ 
-                            text: tabela.anoAnterior ? this.formatCurrency(tabela.anoAnterior) : '-',
+                            text: tabela.anoAnterior ? this.formatCurrency(tabela.anoAnterior, showCents) : '-',
                             font: "Times New Roman", // Fonte padrão ABNT
                             color: "000000" // Preto para valores normais
                         })],
@@ -298,7 +299,7 @@ private createTable(tabelas: any[]): Table {
                 new TableCell({
                     children: [new Paragraph({
                         children: [new TextRun({ 
-                            text: tabela.anoAtual ? this.formatCurrency(tabela.anoAtual) : '-',
+                            text: tabela.anoAtual ? this.formatCurrency(tabela.anoAtual, showCents) : '-',
                             font: "Times New Roman", // Fonte padrão ABNT
                             color: "000000" // Preto para valores normais
                         })],
@@ -347,7 +348,7 @@ private createTable(tabelas: any[]): Table {
             new TableCell({
                 children: [new Paragraph({
                     children: [new TextRun({ 
-                        text: this.formatCurrency(totalAnoAnterior),
+                        text: this.formatCurrency(totalAnoAnterior, showCents),
                         bold: true,
                         font: "Times New Roman",
                         color: "000000" // Preto
@@ -369,7 +370,7 @@ private createTable(tabelas: any[]): Table {
             new TableCell({
                 children: [new Paragraph({
                     children: [new TextRun({ 
-                        text: this.formatCurrency(totalAnoAtual),
+                        text: this.formatCurrency(totalAnoAtual, showCents),
                         bold: true,
                         font: "Times New Roman",
                         color: "000000" // Preto
@@ -712,12 +713,13 @@ private createTable(tabelas: any[]): Table {
     return cleanContent.length > 0;
   }
 
-  private formatCurrency(value: number): string {
-    
-    const formatted = new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(Math.abs(value));
+  private formatCurrency(value: number, showCents: boolean = true): string {
+    const options: Intl.NumberFormatOptions = {
+      minimumFractionDigits: showCents ? 2 : 0,
+      maximumFractionDigits: showCents ? 2 : 0
+    };
+
+    const formatted = new Intl.NumberFormat('pt-BR', options).format(Math.abs(value));
     
     return value < 0 ? `(${formatted})` : formatted;
   }

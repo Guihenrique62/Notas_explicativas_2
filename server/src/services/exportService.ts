@@ -24,7 +24,7 @@ export class ExportService {
         throw new Error('Empresa não encontrada');
       }
       const notas = await this.fetchNotas(companyId);
-      const buffer = await this.docxConverter.convertNotasToDocx(notas);
+      const buffer = await this.docxConverter.convertNotasToDocx(notas, company.showCents);
       
       this.responseHandler.setDownloadHeaders(res, company.name, buffer.length);
       return buffer;
