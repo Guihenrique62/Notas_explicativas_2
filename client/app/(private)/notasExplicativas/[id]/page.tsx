@@ -147,6 +147,7 @@ export default function NotasExplicativasPage({ params }: NotasExplicativasPageP
           onExportClick={handleExport}
           totalNotas={notas.length}
           exportLoading={exportLoading}
+          companyId={params.id}
         />
 
         <div className="grid">

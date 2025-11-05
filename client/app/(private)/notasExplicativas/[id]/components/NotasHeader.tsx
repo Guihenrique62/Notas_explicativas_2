@@ -1,6 +1,8 @@
 // src/components/NotasHeader.tsx
+import ShowCentsInput from '@/app/(private)/globalComponents/ShowCentsInput';
 import { Button } from 'primereact/button';
 import { Tooltip } from 'primereact/tooltip';
+
 
 interface NotasHeaderProps {
   onRefresh: () => void;
@@ -8,17 +10,20 @@ interface NotasHeaderProps {
   onExportClick: () => void;
   totalNotas?: number;
   exportLoading?: boolean;
+  companyId: string;
 }
 
 export default function NotasHeader({ 
-  onRefresh, 
+  onRefresh,
+  companyId,
   onCreateClick,
   onExportClick,
   totalNotas,
   exportLoading = false
 }: NotasHeaderProps) {
+  
   return (
-    <div className="flex justify-content-between align-items-center mb-4">
+    <div className="flex card mb-4 justify-content-between align-items-center mb-4">
       <div>
         <h1 className="text-3xl font-bold m-0">Notas Explicativas</h1>
         {totalNotas !== undefined && (
@@ -33,6 +38,9 @@ export default function NotasHeader({
       <Tooltip target=".create-btn" />
       
       <div className="flex gap-2">
+
+        <ShowCentsInput companyId={companyId} />
+
         <Button
           icon="pi pi-refresh"
           className="p-button-outlined p-button-secondary refresh-btn"
@@ -60,6 +68,7 @@ export default function NotasHeader({
           tooltipOptions={{ position: 'top' }}
           onClick={onCreateClick}
         />
+
       </div>
     </div>
   );
