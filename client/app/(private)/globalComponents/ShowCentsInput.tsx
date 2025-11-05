@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 
 const updateCompanyPlan = async (companyId: string) => {
   try {
-    const response = await api.put(`/companies/plan/${companyId}`);
+    const response = await api.put(`/companies/showCents/${companyId}`);
 
     if (!response.status || response.status !== 200) {
       throw new Error(response.data?.error || 'Erro ao atualizar plano da empresa');
     }
 
-    return response.data as {planOfCountsAgrocontar: boolean};
+    return response.data as {showCents: boolean};
   } catch (error) {
     console.error('Erro ao atualizar plano da empresa:', error);
     return 
@@ -20,13 +20,13 @@ const updateCompanyPlan = async (companyId: string) => {
 
 export const fetchCompanyPlan = async (companyId: string) => {
   try {
-    const response = await api.get(`/companies/plan/${companyId}`);
+    const response = await api.get(`/companies/showCents/${companyId}`);
 
     if (!response.status || response.status !== 200) {
       throw new Error(response.data?.error || 'Erro ao buscar plano da empresa');
     }
 
-    return response.data as {planOfCountsAgrocontar: boolean};
+    return response.data as {showCents: boolean};
   } catch (error) {
     console.error('Erro ao buscar plano da empresa:', error);
     return 
@@ -41,7 +41,7 @@ const ShowCentsInput = ({ companyId }: { companyId: string }) => {
     fetchCompanyPlan(companyId).then(
       (data) => {
         if(data) {
-          setChecked(data.planOfCountsAgrocontar);
+          setChecked(data.showCents);
         }
       }
     )
